@@ -1,146 +1,84 @@
 package sistema;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
-public class Main 
+public class Main {
 
-{
+    static List<Evento> eventos = new ArrayList<>();
+    static Scanner scanner = new Scanner(System.in);
 
-    public static void main(String[] args) 
-    
-    {
-
-        Scanner sc = new Scanner(System.in);
-        ArrayList<Pessoa> listaPessoas = new ArrayList<>();
+    public static void main(String[] args) {
 
         int opcao;
 
-        do 
-        
-        {
-            System.out.println("\n=== SISTEMA DE CADASTRAMENTO ===");
-            System.out.println("1 - Cadastrar pessoa");
-            System.out.println("2 - Listar pessoas");
-            System.out.println("3 - Editar pessoa");
-            System.out.println("4 - Remover pessoa");
-            System.out.println("5 - Sair");
-            System.out.print("Escolha uma opção: ");
-            opcao = sc.nextInt();
-            sc.nextLine();
+        do {
+            System.out.println("\n=== MENU ===");
+            System.out.println("1 - Cadastrar evento");
+            System.out.println("2 - Listar eventos");
+            System.out.println("0 - Sair");
+            System.out.print("Escolha: ");
 
-            switch (opcao) 
-            
-            {
+            opcao = Integer.parseInt(scanner.nextLine());
 
-                case 1:
-                    System.out.print("Digite o nome: ");
-                    String nome = sc.nextLine();
-
-                    System.out.print("Digite a idade: ");
-                    int idade = sc.nextInt();
-                    sc.nextLine();
-
-                    System.out.print("Digite o email: ");
-                    String email = sc.nextLine();
-
-                    Pessoa novaPessoa = new Pessoa(nome, idade, email);
-                    listaPessoas.add(novaPessoa);
-
-                    System.out.println("Pessoa cadastrada com sucesso!");
-                    break;
-
-                case 2:
-                    if (listaPessoas.isEmpty()) 
-                    
-                    {
-                    	
-                        System.out.println("Nenhuma pessoa cadastrada.");
-                        
-                    } 
-                    
-                    else 
-                    
-                    {
-                        for (int i = 0; i < listaPessoas.size(); i++) 
-                        
-                        {
-                            Pessoa p = listaPessoas.get(i);
-                            System.out.println("ID: " + i);
-                            System.out.println("Nome: " + p.getNome());
-                            System.out.println("Idade: " + p.getIdade());
-                            System.out.println("Email: " + p.getEmail());
-                            System.out.println("----------------------");
-                        }
-                    }
-                    
-                    break;
-
-                case 3:
-                    System.out.print("Digite o ID da pessoa para editar: ");
-                    int idEditar = sc.nextInt();
-                    sc.nextLine();
-
-                    if (idEditar >= 0 && idEditar < listaPessoas.size()) 
-                    
-                    {
-
-                        Pessoa p = listaPessoas.get(idEditar);
-
-                        System.out.print("Novo nome: ");
-                        p.setNome(sc.nextLine());
-
-                        System.out.print("Nova idade: ");
-                        p.setIdade(sc.nextInt());
-                        sc.nextLine();
-
-                        System.out.print("Novo email: ");
-                        p.setEmail(sc.nextLine());
-
-                        System.out.println("Pessoa atualizada com sucesso!");
-                    } 
-                    
-                    else 
-                    
-                    {
-                        System.out.println("ID inválido.");
-                        
-                    }
-                    
-                    break;
-
-                case 4:
-                    System.out.print("Digite o ID da pessoa para remover: ");
-                    int idRemover = sc.nextInt();
-                    sc.nextLine();
-
-                    if (idRemover >= 0 && idRemover < listaPessoas.size()) 
-                    
-                    {
-                        listaPessoas.remove(idRemover);
-                        System.out.println("Pessoa removida com sucesso!");
-                    } 
-                    
-                    else 
-                    
-                    {
-                        System.out.println("ID inválido.");
-                    }
-                    
-                    break;
-
-                case 5:
-                    System.out.println("Sistema encerrado.");
-                    break;
-
-                default:
-                    System.out.println("Opção inválida.");
+            switch (opcao) {
+                case 1 -> cadastrarEvento();
+                case 2 -> listarEventos();
+                case 0 -> System.out.println("Saindo...");
+                default -> System.out.println("Opção inválida!");
             }
 
-        } 
-        
-        while (opcao != 5);
+        } while (opcao != 0);
+    }
 
-        sc.close();
+    private static void cadastrarEvento() {
+
+        System.out.print("Nome do evento: ");
+        String nome = scanner.nextLine();
+
+        System.out.println("Categoria:");
+        System.out.println("1 - Festa");
+        System.out.println("2 - Esportivo");
+        System.out.println("3 - Show");
+        System.out.println("4 - Outros");
+        System.out.print("Escolha: ");
+
+        int cat = Integer.parseInt(scanner.nextLine());
+
+        CategoriaEvento categoria;
+
+        switch (cat) {
+            case 1 -> categoria = CategoriaEvento.FESTA;
+            case 2 -> categoria = CategoriaEvento.ESPORTIVO;
+            case 3 -> categoria = CategoriaEvento.SHOW;
+            default -> categoria = CategoriaEvento.OUTROS;
+        }
+
+        System.out.print("Data e hora (dd/MM/yyyy HH:mm): ");
+        String dataStr = scanner.nextLine();
+
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        LocalDateTime dataHora = LocalDateTime.parse(dataStr, fmt);
+
+        Evento evento = new Evento(nome, categoria, dataHora);
+        eventos.add(evento);
+
+        System.out.println("✅ Evento cadastrado com sucesso!");
+    }
+
+    private static void listarEventos() {
+
+        if (eventos.isEmpty()) {
+            System.out.println("Nenhum evento cadastrado.");
+            return;
+        }
+
+        System.out.println("\n=== EVENTOS ===");
+        for (Evento e : eventos) {
+            System.out.println(e);
+        }
     }
 }
