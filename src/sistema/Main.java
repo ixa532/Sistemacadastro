@@ -13,6 +13,9 @@ public class Main {
 
     public static void main(String[] args) {
 
+        // carrega eventos (placeholder)
+        eventos = ArquivoUtil.carregarEventos();
+
         int opcao;
 
         do {
@@ -22,7 +25,12 @@ public class Main {
             System.out.println("0 - Sair");
             System.out.print("Escolha: ");
 
-            opcao = Integer.parseInt(scanner.nextLine());
+            try {
+                opcao = Integer.parseInt(scanner.nextLine());
+            } catch (Exception e) {
+                System.out.println("❌ Digite um número válido.");
+                opcao = -1;
+            }
 
             switch (opcao) {
                 case 1 -> cadastrarEvento();
@@ -46,7 +54,13 @@ public class Main {
         System.out.println("4 - Outros");
         System.out.print("Escolha: ");
 
-        int cat = Integer.parseInt(scanner.nextLine());
+        int cat;
+        try {
+            cat = Integer.parseInt(scanner.nextLine());
+        } catch (Exception e) {
+            System.out.println("❌ Categoria inválida.");
+            return;
+        }
 
         CategoriaEvento categoria;
 
@@ -60,11 +74,20 @@ public class Main {
         System.out.print("Data e hora (dd/MM/yyyy HH:mm): ");
         String dataStr = scanner.nextLine();
 
-        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-        LocalDateTime dataHora = LocalDateTime.parse(dataStr, fmt);
+        LocalDateTime dataHora;
+
+        try {
+            DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+            dataHora = LocalDateTime.parse(dataStr, fmt);
+        } catch (Exception e) {
+            System.out.println("❌ Data inválida! Use o formato dd/MM/yyyy HH:mm");
+            return;
+        }
 
         Evento evento = new Evento(nome, categoria, dataHora);
         eventos.add(evento);
+
+        ArquivoUtil.salvarEventos(new ArrayList<>(eventos));
 
         System.out.println("✅ Evento cadastrado com sucesso!");
     }
@@ -75,6 +98,9 @@ public class Main {
             System.out.println("Nenhum evento cadastrado.");
             return;
         }
+
+        // ordena por data
+        eventos.sort((a, b) -> a.getDataHora().compareTo(b.getDataHora()));
 
         System.out.println("\n=== EVENTOS ===");
         for (Evento e : eventos) {

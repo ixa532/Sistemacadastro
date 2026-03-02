@@ -15,6 +15,18 @@ public class Evento {
         this.dataHora = dataHora;
     }
 
+    public String getNome() {
+        return nome;
+    }
+
+    public CategoriaEvento getCategoria() {
+        return categoria;
+    }
+
+    public LocalDateTime getDataHora() {
+        return dataHora;
+    }
+
     public boolean jaAconteceu() {
         return dataHora.isBefore(LocalDateTime.now());
     }
@@ -22,9 +34,12 @@ public class Evento {
     @Override
     public String toString() {
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-        return "Nome: " + nome +
-               " | Categoria: " + categoria +
-               " | Data: " + dataHora.format(fmt) +
-               (jaAconteceu() ? " | STATUS: JÁ ACONTECEU" : " | STATUS: VAI ACONTECER");
+
+        String status = jaAconteceu() ? "JÁ ACONTECEU" : "VAI ACONTECER";
+
+        return "Evento: " + nome +
+                " | Categoria: " + categoria +
+                " | Data: " + dataHora.format(fmt) +
+                " | Status: " + status;
     }
 }
