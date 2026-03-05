@@ -2,109 +2,146 @@ package sistema;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class Main {
 
     static List<Evento> eventos = new ArrayList<>();
     static Scanner scanner = new Scanner(System.in);
+    static Pessoa usuario;
 
     public static void main(String[] args) {
 
-        // carrega eventos (placeholder)
         eventos = ArquivoUtil.carregarEventos();
+
+        cadastrarUsuario();
 
         int opcao;
 
         do {
+
             System.out.println("\n=== MENU ===");
             System.out.println("1 - Cadastrar evento");
             System.out.println("2 - Listar eventos");
+            System.out.println("3 - Participar de evento");
+            System.out.println("4 - Cancelar participação");
             System.out.println("0 - Sair");
-            System.out.print("Escolha: ");
 
-            try {
-                opcao = Integer.parseInt(scanner.nextLine());
-            } catch (Exception e) {
-                System.out.println("❌ Digite um número válido.");
-                opcao = -1;
-            }
+            opcao = Integer.parseInt(scanner.nextLine());
 
             switch (opcao) {
+
                 case 1 -> cadastrarEvento();
                 case 2 -> listarEventos();
-                case 0 -> System.out.println("Saindo...");
-                default -> System.out.println("Opção inválida!");
+                case 3 -> participarEvento();
+                case 4 -> cancelarParticipacao();
             }
 
         } while (opcao != 0);
+
+        ArquivoUtil.salvarEventos(new ArrayList<>(eventos));
+
+        System.out.println("Sistema encerrado.");
     }
 
-    private static void cadastrarEvento() {
+    static void cadastrarUsuario() {
+
+        System.out.println("=== Cadastro de usuário ===");
+
+        System.out.print("Nome: ");
+        String nome = scanner.nextLine();
+
+        System.out.print("Email: ");
+        String email = scanner.nextLine();
+
+        System.out.print("Cidade: ");
+        String cidade = scanner.nextLine();
+
+        usuario = new Pessoa(nome, email, cidade);
+    }
+
+    static void cadastrarEvento() {
 
         System.out.print("Nome do evento: ");
         String nome = scanner.nextLine();
 
-        System.out.println("Categoria:");
-        System.out.println("1 - Festa");
-        System.out.println("2 - Esportivo");
-        System.out.println("3 - Show");
-        System.out.println("4 - Outros");
-        System.out.print("Escolha: ");
+        System.out.println("1 FESTA");
+        System.out.println("2 ESPORTIVO");
+        System.out.println("3 SHOW");
+        System.out.println("4 CULTURAL");
 
-        int cat;
-        try {
-            cat = Integer.parseInt(scanner.nextLine());
-        } catch (Exception e) {
-            System.out.println("❌ Categoria inválida.");
-            return;
-        }
+        int op = Integer.parseInt(scanner.nextLine());
 
-        CategoriaEvento categoria;
+        CategoriaEvento categoria = switch (op) {
+            case 1 -> CategoriaEvento.FESTA;
+            case 2 -> CategoriaEvento.ESPORTIVO;
+            case 3 -> CategoriaEvento.SHOW;
+            default -> CategoriaEvento.CULTURAL;
+        };
 
-        switch (cat) {
-            case 1 -> categoria = CategoriaEvento.FESTA;
-            case 2 -> categoria = CategoriaEvento.ESPORTIVO;
-            case 3 -> categoria = CategoriaEvento.SHOW;
-            default -> categoria = CategoriaEvento.OUTROS;
-        }
+        System.out.print("Data (dd/MM/yyyy HH:mm): ");
+        String data = scanner.nextLine();
 
-        System.out.print("Data e hora (dd/MM/yyyy HH:mm): ");
-        String dataStr = scanner.nextLine();
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
-        LocalDateTime dataHora;
-
-        try {
-            DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-            dataHora = LocalDateTime.parse(dataStr, fmt);
-        } catch (Exception e) {
-            System.out.println("❌ Data inválida! Use o formato dd/MM/yyyy HH:mm");
-            return;
-        }
+        LocalDateTime dataHora = LocalDateTime.parse(data, fmt);
 
         Evento evento = new Evento(nome, categoria, dataHora);
+
         eventos.add(evento);
 
         ArquivoUtil.salvarEventos(new ArrayList<>(eventos));
 
-        System.out.println("✅ Evento cadastrado com sucesso!");
+        System.out.println("Evento cadastrado.");
     }
 
-    private static void listarEventos() {
+    static void listarEventos() {
 
         if (eventos.isEmpty()) {
-            System.out.println("Nenhum evento cadastrado.");
+            System.out.println("Nenhum evento.");
             return;
         }
 
-        // ordena por data
-        eventos.sort((a, b) -> a.getDataHora().compareTo(b.getDataHora()));
+        eventos.sort(Comparator.comparing(Evento::getDataHora));
 
-        System.out.println("\n=== EVENTOS ===");
+        int i = 1;
+
         for (Evento e : eventos) {
-            System.out.println(e);
+
+            if (e.getDataHora().isBefore(LocalDateTime.now())) {
+                System.out.println("(JÁ OCORREU)");
+            }
+
+            System.out.println(i + " - " + e);
+            i++;
         }
+    }
+
+    static void participarEvento() {
+
+        listarEventos();
+
+        System.out.print("Escolha o evento: ");
+        int escolha = Integer.parseInt(scanner.nextLine());
+
+        Evento evento = eventos.get(escolha - 1);
+
+        evento.adicionarParticipante(usuario);
+
+        System.out.println("Participação confirmada.");
+    }
+
+    static void cancelarParticipacao() {
+
+        listarEventos();
+
+        System.out.print("Escolha o evento: ");
+        int escolha = Integer.parseInt(scanner.nextLine());
+
+        Evento evento = eventos.get(escolha - 1);
+
+        evento.removerParticipante(usuario);
+
+        System.out.println("Participação cancelada.");
     }
 }

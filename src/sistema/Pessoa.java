@@ -23,4 +23,9 @@ public class Pessoa {
     public String getCidade() {
         return cidade;
     }
+
+    @Override
+    public String toString() {
+        return nome + " - " + email + " - " + cidade;
+    }
 }
